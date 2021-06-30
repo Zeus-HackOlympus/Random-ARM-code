@@ -14,9 +14,9 @@
 
 ## ARM instructions 
 
-- <operator> <dst>, <src> 
-- <operator> <dst>, <immediate>
-- <operator> <dst>, [address] 
+- \<operator\> \<dst\>, \<src\> 
+- \<operator\> \<dst\>, \<immediate\>
+- \<operator\> \<dst\>, [address] 
 
 - Example: 
     - mov r0, #0x4 
@@ -24,7 +24,7 @@
 
 ## Our first code 
 
-```arm
+```assembly
 .global _start
 .section .text
 
@@ -38,7 +38,7 @@ _start:
 
 
 to run above code :
-```
+```sh
 # first we will assemble it and convert to machine code  
 arm-linux-gnueabi-as first_code.asm -o first_code.o 
 # then we will pass it to linker to make it executable
@@ -66,7 +66,7 @@ so we add a syscall in our previous program and assemble and link it again
 
 out program looks like this : 
 
-```asm 
+```assembly
 .global _start 
 
 .section .text
@@ -109,7 +109,7 @@ but suppose we want to take data from **memory** and use it in a **register**. *
 
 ### practical 
 
-```asm
+```assembly
 .global _start 
 
 .text 
@@ -146,13 +146,13 @@ here we are doing stdout
 so return value will be 1 : `mov r0,#1`
 
 We take data from memory and assign it to some registers: 
-    ``` asm
+    ``` assembly
     ldr r1,=message
     ldr r2,=len
     ```
 
 Now because we need to write on screen, our first syscall is for write which is 4 : 
-    ```asm
+    ```assembly
     mov r7,#4 
     swi 0 
     ```
@@ -164,7 +164,7 @@ Now we haven't exited from the program, for that another syscall for exit now :
     ```
 
 our full code : 
-```asm 
+```assembly
 .global _start 
 
 .text 
