@@ -289,7 +289,7 @@ xoring a register by itself and then storing the result in that particulare regi
 
 code : 
 
-```
+```assembly
 .global _start 
 
 .text 
