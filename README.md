@@ -57,8 +57,7 @@ register **r0-r6** are used for passing system calls code and to to execute a fu
 
 Now we need to know the right syscall code to pass in **r7**. 
 
-!(google has an awesome documentation for us:)
-[https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#arm-32_bit_EABI]
+[google has an awesome documentation for us](https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#arm-32_bit_EABI)
 
 from above link we know our syscall is 1, we will pass it using immidiate passing technique 
 
