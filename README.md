@@ -108,6 +108,27 @@ but suppose we want to take data from **memory** and use it in a **register**. *
 
 ### practical 
 
+We use `write` to print data on screen . 
+
+Lets look at man page of write `man 2 write` 
+and we found this : 
+
+```
+#include <unistd.h>
+
+ssize_t write(int fd, const void *buf, size_t count);
+```
+
+Write takes 3 arguments: 
+    - fd : file descriptor 
+        - 0 stdin standard input 
+        - 1 stdout standard output 
+        - 2 stderr standard error 
+    - buf : Basically what we want to write; we will be loading this from the memory 
+    - `size_t` : Size of what we want to write, this too will be loaded from memory 
+
+
+
 ```assembly
 .global _start 
 
@@ -142,13 +163,15 @@ In above code we create 2 label :
 
 here we are doing stdout 
 
-so return value will be 1 : `mov r0,#1`
+so return value will be 1 : `mov r0,#1` (first argument)
 
 We take data from memory and assign it to some registers: 
     ``` assembly
     ldr r1,=message
     ldr r2,=len
     ```
+r1 - second argument to write 
+r2 - third argument to write 
 
 Now because we need to write on screen, our first syscall is for write which is 4 : 
     ```assembly
@@ -188,4 +211,100 @@ msg:
 
 len = .-msg
 ```
+## Third code (/bin/sh")
+
+We are gonna start a `/bin/sh` using ARM ASM code. 
+
+This code will be like hello word except this time instead of `write` we will use execve 
+
+from man pages : 
+```
+#include <unistd.h>
+
+int execve(const char *pathname, char *const argv[],
+                  char *const envp[]);
+```
+- For pathname we will pass "/bin/sh"
+- there are no argumnents to "/bin/sh" So null and null can be represented using 0 
+- `envp`  is an array of strings, conventionally of the form key=value, which are passed as environment to the new program. (From man pages)  : THIS TOO IS NULL
+
+We can pass null in many other forms, basically the principal remains same that we are passing a 0, 
+
+### Passing NULL in ASM 
+
+- **Method - 1**
+
+Using a simple 0(immidiate) 
+
+code: 
+```assembly
+.global _start 
+
+.text 
+
+_start : 
+    ldr r0,=path 
+    mov r1,#0
+    mov r2,#0
+    mov r7,#11
+    swi 0
+
+
+.data 
+path:
+    .asciz "/bin/sh"
+```
+
+- **Method - 2**
+
+using subtraction 
+
+We will basically use `sub` instruction, and subtract a register by itself and store the value in that register, i.e r1 = r1 - r1 
+
+Which is basically 0 
+
+code : 
+```assembly 
+.global _start 
+
+.text 
+
+_start : 
+    ldr r0,=path
+    sub r1,r1,r1 // r1 = r1 - r1 ; which is basically r1 = 0 
+    sub r2,r2,r2 
+    mov r7,#11 
+    swi 0 
+
+.data 
+path : 
+    .asciz "/bin/sh"
+```
+
+- **Method - 3** 
+
+We can use `xor`, similar to `sub` instruction to get 0 result 
+
+xoring a register by itself and then storing the result in that particulare register. 
+
+code : 
+
+```
+.global _start 
+
+.text 
+
+_start : 
+
+    ldr r0,=path 
+    eor r1,r1,r1
+    eor r2,r2,r2 
+    add r7,#11
+    swi 0 
+
+.data 
+path:
+    .asciz "/bin/sh"
+```
+
 
