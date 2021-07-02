@@ -305,6 +305,124 @@ _start :
 .data 
 path:
     .asciz "/bin/sh"
+``
+## Funtions 
+
+2 function code will look like this : 
+
+```
+.text
+
+.global _start
+
+_start :
+    mov r7, #4 // write
+    mov r0, #1 // stdout
+    mov r2, #12 // len of msg
+    ldr r1, =msg
+    swi 0
+
+end:
+    mov r7, #1
+    swi 0
+
+
+.data
+
+msg :
+    .ascii "Hello World\n"
+```
+As you can see instead of using 2 syscalls in `_start` we have made the code look neat by making 2 funtions 
+
+In general assembler will assembly the code from line 1 to ending and will execute in that order as it is written, **IF NO BRANCHING IS DONE**
+
+## PC register 
+- Program counter - stores the value of program 
+- PC is always 2 instructions aheah of current register. 
+
+
+## Branching 
+Branching is a way to "call" a "function" from a function. 
+General syntax:  
+```assembly 
+b{cond} function_name
 ```
 
+Lets see with this easy ex : 
 
+```assembly 
+.text 
+
+.global _start 
+
+_start : 
+    mov r1, #5 
+    add r0, r1, #5 // r0 = 10 
+    b func2 
+    add r0, r0, #10 // r0 = 20 
+    mov r7, #1
+    swi 0 
+
+func2: 
+    mov r7, #1 
+    swi 0 
+```
+
+lets look at the return code : 
+
+```bash 
+$ echo $? 
+10 
+```
+
+Why we got 10 when r0 at the end of the code is 20, because we have branched the code, and have changed its control flow, We can do this by using PC register also.
+So everything under the line `b func2` has been assembled but does not take affect because the program has exited before. 
+
+**Using pc:** 
+```
+.text 
+
+.global _start 
+
+_start : 
+    mov r1, #5 
+    add r0, r1, #5 // r0 = 10 
+    add pc,pc,#8  
+    add r0, r0, #10 // r0 = 20 
+    mov r7, #1
+    swi 0 
+
+func2: 
+    mov r7, #1 
+    swi 0 
+```
+
+Because pc contains the address of 2 instruction ahead and because every instruction is of 4 bytes, I added 4 + 4 + 4  = 12, So that pc points to first line of `func2`.  
+
+## Thumb mode 
+Some instructions doesn't need 32 bit of architecture to do their operation, they can do same using less bits. The ARM assembly programmers notices that some operations can do the same operation in 16 bit too. They identified that, a lot of memory is going in waste. To fix this they introduced thumb mode where user can do the operations in 16 bit mode. 
+
+So basically thumb mode is a way to write code efficiently. In ARM mode(32 bit), an intruction uses 4 bits but in thumb mode(16 bit) an instruction uses 2 bits only. So we can use remaining 2 bits in some other operation. 
+
+Thumb instruction set can improve
+    - Code density 
+    - power-efficiency 
+    - Save cost 
+    - Enhance performance 
+
+Now how does the processor know when to enter thumb mode ? For this CPSR and `bx` instruction comes into play. 
+## CPSR - Current program state register
+
+The Current Program Status Register (CPSR) holds processor status and control information. It looks somethings like this: 
+
+![http://izobs.github.io/picture/arm1.png]()
+
+
+Above is a pic of a **register** and columns denote the **flag** in registers. Notice the thumb state register, this resgister denotes which state we are running our code in. 
+
+If it is 1, we are doing our operations in thumb mode else in 32 bit armv7 mode. It is also known as **T bit**. 
+
+
+## How to give instruction to switch to thumb mode ? 
+
+How to give instruction to processor to change T bit to 1. For that we use `bx` instruction(Branch and exchange instruction).   
