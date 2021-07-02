@@ -305,12 +305,12 @@ _start :
 .data 
 path:
     .asciz "/bin/sh"
-``
+```
 ## Funtions 
 
 2 function code will look like this : 
 
-```
+```assembly
 .text
 
 .global _start
@@ -379,7 +379,8 @@ Why we got 10 when r0 at the end of the code is 20, because we have branched the
 So everything under the line `b func2` has been assembled but does not take affect because the program has exited before. 
 
 **Using pc:** 
-```
+
+```assembly
 .text 
 
 .global _start 
@@ -398,6 +399,78 @@ func2:
 ```
 
 Because pc contains the address of 2 instruction ahead and because every instruction is of 4 bytes, I added 4 + 4 + 4  = 12, So that pc points to first line of `func2`.  
+
+### Conditions using branching 
+Using CSPR register and its flags, conditional branching is performed. 
+
+### CMP instruction 
+
+- CMP instruction compares the values stored at 2 register. 
+
+- Suppose we do `cmp r0, r1`. It will do, **r0-r1** and if : 
+     - r0 < r1: Result is -ve and CPSR register's -ve flag will set to TRUE, 
+     - r0 > r1: Result is +ve and CPSR register's -ve flag will set to FALSE, 
+     - r0 == r1: Result is 0 and CPSR register's zero flag will set to TRUE
+
+According to what flag is set `conditional` statement works. 
+
+- BEQ : Branch is equal. If cpsr register's zero flag is true 
+- BGT: Branch is greater than. If cpsr regiter's -ve flag is false 
+- BLT: Branch is less than. If cpsr register's .........
+
+```assembly
+.text 
+
+.global _start 
+
+_start : 
+    mov r1, #15  // r1 = 5 
+    mov r2, #10 // r2 = 10  
+    cmp r1,r2  // r1 < r2 
+    beq r1_r2_equal 
+    bgt r1_r2_greater 
+    blt r1_r2_less 
+
+r1_r2_equal :
+    mov r7, #4 
+    mov r0, #1 
+    ldr r1, =eq
+    ldr r2, =eq_len
+    swi 0 
+    b exit
+
+r1_r2_greater :
+    mov r7, #4 
+    mov r0, #1 
+    ldr r1, =gr
+    ldr r2, =gr_len
+    swi 0
+    b exit 
+
+r1_r2_less :
+    mov r7, #4 
+    mov r0, #1 
+    ldr r1, =le
+    ldr r2, =le_len
+    swi 0 
+    b exit
+
+exit : 
+    mov r7, #1 
+    swi 0 
+
+.data 
+    eq: .ascii "r1 and r2 are equal\n\0"
+    eq_len = .-eq
+    gr: .ascii "r1 greater\n\0"
+    gr_len = .-gr
+    le: .ascii "r1 less than\n\0"
+    le_len = .-le
+```
+
+
+
+
 
 ## Thumb mode 
 Some instructions doesn't need 32 bit of architecture to do their operation, they can do same using less bits. The ARM assembly programmers notices that some operations can do the same operation in 16 bit too. They identified that, a lot of memory is going in waste. To fix this they introduced thumb mode where user can do the operations in 16 bit mode. 
