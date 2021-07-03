@@ -341,6 +341,18 @@ In general assembler will assembly the code from line 1 to ending and will execu
 - PC is always 2 instructions aheah of current register. 
 
 
+## CPSR - Current program state register
+
+The Current Program Status Register (CPSR) holds processor status and control information. It looks somethings like this: 
+
+![http://izobs.github.io/picture/arm1.png]()
+
+
+Above is a pic of a **register** and columns denote the **flag** in registers. Notice the thumb state register, this resgister denotes which state we are running our code in. 
+
+If it is 1, we are doing our operations in thumb mode else in 32 bit armv7 mode. It is also known as **T bit**. 
+
+ 
 ## Branching 
 Branching is a way to "call" a "function" from a function. 
 General syntax:  
@@ -468,8 +480,18 @@ exit :
     le_len = .-le
 ```
 
+Now comes a very important instruction BX instruction 
 
+#### BX instruction 
 
+Branch and exchange instruction set.
+
+This instruction looks at the T bit in CSPR register it is set then, it goes to thumb mode.
+
+```assembly 
+add r0,r0,#1  
+bx <function>
+```
 
 
 ## Thumb mode 
@@ -483,19 +505,6 @@ Thumb instruction set can improve
     - Save cost 
     - Enhance performance 
 
-Now how does the processor know when to enter thumb mode ? For this CPSR and `bx` instruction comes into play. 
-## CPSR - Current program state register
-
-The Current Program Status Register (CPSR) holds processor status and control information. It looks somethings like this: 
-
-![http://izobs.github.io/picture/arm1.png]()
+Now how does the processor know when to enter thumb mode ? For this CPSR and `bx` instruction comes into play.
 
 
-Above is a pic of a **register** and columns denote the **flag** in registers. Notice the thumb state register, this resgister denotes which state we are running our code in. 
-
-If it is 1, we are doing our operations in thumb mode else in 32 bit armv7 mode. It is also known as **T bit**. 
-
-
-## How to give instruction to switch to thumb mode ? 
-
-How to give instruction to processor to change T bit to 1. For that we use `bx` instruction(Branch and exchange instruction).   
